@@ -35,9 +35,9 @@ exports.register = function(app){
 				};
 				list[game_id] = x;
 				promises.push(db.get_game_state(ctx, game_id, 
-					function(ctx, gameState){
-						x.Properties = gameState;
-					}));
+					function(x) {return function(ctx, gameState){
+						x.Properties = gameState;						
+					}}(x)));
 			}
 		}, 
 		error: function (error) { fail(error.code, error.message); }}
