@@ -4,8 +4,8 @@
             "link": "photon-turnbased"
         }, 
         "photon-turnbased": {
-            "applicationId": "Z10Jq1VMKHhMHp4GsxJKfnjI6NZ3odBKiDFvzO5n", 
-            "masterKey": "KAUJiMv4tdnZ5CupIsohEvVaILCjXDLyvhbSoRf1"
+            "applicationId": "- use global.json generated during project setup -", 
+            "masterKey": "- use global.json generated during project setup -"
         }
     }, 
     "global": {
