@@ -8,7 +8,7 @@ var db = require('cloud/db.js');
 exports.register = function(app){
 
 	app.post('/' + hookName, function(req, res) {
-		var ctx = {ret: {ResultCode: 0, Mesage: ""}, res: res, fail: fail, ok: true};
+		var ctx = {hookName: hookName, ret: {ResultCode: 0, Mesage: ""}, res: res, fail: fail, ok: true};
 
 		console.log(hookName + ": req.query = " + JSON.stringify(req.query));
 		console.log(hookName + ": req.body = " + JSON.stringify(req.body));
@@ -28,16 +28,18 @@ exports.register = function(app){
 		query.find({success: function (results) {
 			console.log(JSON.stringify(results));
 			for(i in results) {
-				var game = results[i];
-				var game_id = game.get("GameId");
-				var x = {
-					ActorNr : game.get("ActorNr")
-				};
-				list[game_id] = x;
-				promises.push(db.get_game_state(ctx, game_id, 
-					function(x) {return function(ctx, gameState){
-						x.Properties = gameState;						
-					}}(x)));
+				var user_game = results[i];
+				promises.push(db.get_game_state(ctx, user_game.get("GameId"), 
+					function(user_game) {return function(ctx, game_state){
+						if(game_state == undefined)
+							db.delete_user_game(ctx, req.body.UserId, user_game.get("GameId"));
+						else {
+							list[user_game.get("GameId")] = {
+								ActorNr : user_game.get("ActorNr"),
+								Properties: game_state.CustomProperties
+							};
+						}
+					}}(user_game)));
 			}
 		}, 
 		error: function (error) { fail(error.code, error.message); }}

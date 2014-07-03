@@ -8,7 +8,7 @@ var db = require('cloud/db.js');
 exports.register = function(app){
 
 	app.post('/' + hookName, function(req, res) {
-		var ctx = {ret: {ResultCode: 0, Mesage: ""}, res: res, fail: fail, ok: true};
+		var ctx = {hookName: hookName, ret: {ResultCode: 0, Mesage: ""}, res: res, fail: fail, ok: true};
 
 		console.log(hookName + ": req.query = " + JSON.stringify(req.query));
 		console.log(hookName + ": req.body = " + JSON.stringify(req.body));
@@ -30,16 +30,7 @@ exports.register = function(app){
 			}
 		}
 		else {
-			var promises = [];
-			for(i in req.body.State.ActorList) {
-				var a = req.body.State.ActorList[i];
-				console.log(hookName + ": saving user game: userid: " + a.UserId + ", gameid: " + req.body.GameId + ", actornr: " + a.ActorNr);
-				promises.push(db.set_user_game(ctx, a.UserId, req.body.GameId, a.ActorNr));
-			}
-			console.log(hookName + ": saving game: " + req.body.GameId + ", state: " + req.body.State);
-			promises.push(db.set_game_state(ctx, req.body.GameId, req.body.State));
-			// wait until game and all users refs saved
-			Parse.Promise.when(promises).then(function() { ok(ctx); } );
+			db.set_game_and_users(ctx, req.body.GameId, req.body.State, req.body.State.ActorList, ok);
 			return;
 		}
 	});

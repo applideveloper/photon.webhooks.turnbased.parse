@@ -110,3 +110,19 @@ exports.delete_user_game = function(ctx, user_id, game_id, success) {
 	});
 }
 
+exports.set_game_and_users = function(ctx, game_id, game_state, actor_list, success) {
+	var promises = [];
+	for(i in actor_list) {
+		var a = actor_list[i];
+		console.log(ctx.hookName + ": saving user game: user_id: " + a.UserId + ", game_id: " + game_id + ", actor_nr: " + a.ActorNr);
+		promises.push(exports.set_user_game(ctx, a.UserId, game_id, a.ActorNr));
+	}
+	console.log(ctx.hookName + ": saving game: " + game_id + ", state: " + game_state);
+	promises.push(exports.set_game_state(ctx, game_id, game_state));
+	// wait until game and all users refs saved
+	return Parse.Promise.when(promises).then(
+		function() {
+			console.log(" - set_game_and_users: OK");
+			if(success) success(ctx);
+		});
+}
